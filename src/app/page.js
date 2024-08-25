@@ -100,7 +100,7 @@ export default function Home() {
     <main className={styles.main}>
       <div className={styles.topper}>
         <div className={styles.icon}></div>
-        <div className={styles.name}>HanGPT</div>
+        <div className={styles.name}>SeoJuAn's AI Assistant</div>
       </div>
       <div className={styles.msgs_cont}>
         <ul id="list_cont">
