@@ -4,7 +4,7 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-  title: 'HanGPT Chatbot',
+  title: "SeoJuAn's AI Assistant",
   description: 'A powerful Chatbot Assistant',
 }
 
