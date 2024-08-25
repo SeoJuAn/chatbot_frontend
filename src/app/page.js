@@ -126,10 +126,12 @@ export default function Home() {
         if (done) break;
         const chunk = decoder.decode(value);
         assistantMessage.content += chunk;
-        setMessages(prevMessages => [
-          ...prevMessages.slice(0, -1),
-          { ...assistantMessage }
-        ]);
+        setMessages(prevMessages => {
+          const newMessages = [...prevMessages];
+          newMessages[newMessages.length - 1] = { ...assistantMessage };
+          return newMessages;
+        });
+        await new Promise(resolve => setTimeout(resolve, 10)); // 작은 지연 추가
       }
     } catch (error) {
       console.error('Error:', error);
