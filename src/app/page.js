@@ -96,12 +96,12 @@ export default function Home() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
-
+  
     const userMessage = { role: 'user', content: input };
     setMessages(prevMessages => [...prevMessages, userMessage]);
     setInput('');
     setIsLoading(true);
-
+  
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat`, {
         method: 'POST',
@@ -114,13 +114,13 @@ export default function Home() {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
+  
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let assistantMessage = { role: 'assistant', content: '' };
-
+  
       setMessages(prevMessages => [...prevMessages, assistantMessage]);
-
+  
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
@@ -131,7 +131,6 @@ export default function Home() {
           newMessages[newMessages.length - 1] = { ...assistantMessage };
           return newMessages;
         });
-        await new Promise(resolve => setTimeout(resolve, 10)); // 작은 지연 추가
       }
     } catch (error) {
       console.error('Error:', error);
