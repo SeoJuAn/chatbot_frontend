@@ -119,6 +119,8 @@ export default function Home() {
       const decoder = new TextDecoder();
       let assistantMessage = { role: 'assistant', content: '' };
 
+      setMessages(prevMessages => [...prevMessages, assistantMessage]);
+
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
