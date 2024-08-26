@@ -176,10 +176,14 @@
 
 'use client';
 
+// 추가
+export const dynamic = 'force-dynamic';
+
+
 import { useState, useEffect, useRef } from 'react';
 import styles from './page.module.css';
 
-export default function Home() {
+export default async function Home() {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
