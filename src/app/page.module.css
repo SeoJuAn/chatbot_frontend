@@ -139,3 +139,43 @@
   padding-left: 12px;
   border-bottom-left-radius: 20px;
 }
+
+/* 새로 추가된 스타일 */
+.codeBlockContainer {
+  position: relative;
+  margin: 10px 0;
+  width: 100%;
+}
+
+.codeBlock {
+  background-color: #2f3542;
+  border-radius: 8px;
+  padding: 15px;
+  overflow-x: auto;
+  font-family: 'Courier New', Courier, monospace;
+  color: #f1f2f6;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.copyButton {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: #747d8c;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 12px;
+  color: #f1f2f6;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.copyButton:hover {
+  background-color: #57606f;
+}
+
+.copyButton:active {
+  transform: scale(0.98);
+}

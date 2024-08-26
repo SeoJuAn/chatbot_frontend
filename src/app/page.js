@@ -384,7 +384,6 @@
 //   );
 // }
 
-
 'use client';
 
 export const dynamic = 'force-dynamic';
@@ -452,27 +451,34 @@ export default function Home() {
   };
 
   const renderMessage = (message) => {
-    const codeBlockRegex = /```[\s\S]*?```/g;
+    const codeBlockRegex = /```([\s\S]*?)```|\b(SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP)[\s\S]*?;/gi;
     const parts = message.content.split(codeBlockRegex);
-    const codeBlocks = message.content.match(codeBlockRegex) || [];
 
-    return parts.map((part, index) => (
-      <React.Fragment key={index}>
-        {part}
-        {codeBlocks[index] && (
-          <pre className={styles.codeBlock}>
-            <code>{codeBlocks[index].replace(/```/g, '').trim()}</code>
-          </pre>
-        )}
-      </React.Fragment>
-    ));
+    return parts.map((part, index) => {
+      if (codeBlockRegex.test(part)) {
+        return (
+          <div key={index} className={styles.codeBlockContainer}>
+            <pre className={styles.codeBlock}>
+              <code>{part.replace(/```/g, '').trim()}</code>
+            </pre>
+            <button 
+              className={styles.copyButton}
+              onClick={() => navigator.clipboard.writeText(part.replace(/```/g, '').trim())}
+            >
+              Copy code
+            </button>
+          </div>
+        );
+      }
+      return <span key={index}>{part}</span>;
+    });
   };
 
   return (
     <main className={styles.main}>
       <div className={styles.topper}>
         <div className={styles.icon}></div>
-        <div className={styles.name}>HanGPT</div>
+        <div className={styles.name}>SeoJuAn's AI Assistant</div>
       </div>
       <div className={styles.msgs_cont}>
         <ul id="list_cont">
