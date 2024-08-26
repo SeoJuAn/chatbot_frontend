@@ -209,13 +209,21 @@
 }
 
 /* Bar 차트 컨테이너 스타일 */
-.chartContainer {
+/* .chartContainer {
   margin-top: 20px;
   width: 100%;
   max-width: 600px;
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   padding: 15px;
+} */
+
+.chartContainer {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 /* Bar 차트 캔버스 스타일 */
