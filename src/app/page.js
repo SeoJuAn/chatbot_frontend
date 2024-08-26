@@ -511,171 +511,171 @@
 
 
 //===========================쿼리 구분은 잘되지만 모든 코드블록 아래에 차트가 생김============================
-'use client';
+// 'use client';
 
-export const dynamic = 'force-dynamic';
+// export const dynamic = 'force-dynamic';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Bar } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
-import styles from './page.module.css';
+// import React, { useState, useEffect, useRef } from 'react';
+// import { Bar } from 'react-chartjs-2';
+// import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+// import styles from './page.module.css';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+// ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-export default function Home() {
-  const [input, setInput] = useState('');
-  const [messages, setMessages] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [chartData, setChartData] = useState(null);
-  const messagesEndRef = useRef(null);
+// export default function Home() {
+//   const [input, setInput] = useState('');
+//   const [messages, setMessages] = useState([]);
+//   const [isLoading, setIsLoading] = useState(false);
+//   const [chartData, setChartData] = useState(null);
+//   const messagesEndRef = useRef(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+//   const scrollToBottom = () => {
+//     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+//   };
 
-  useEffect(scrollToBottom, [messages]);
+//   useEffect(scrollToBottom, [messages]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!input.trim() || isLoading) return;
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+//     if (!input.trim() || isLoading) return;
 
-    const userMessage = { role: 'user', content: input };
-    setMessages(prevMessages => [...prevMessages, userMessage]);
-    setInput('');
-    setIsLoading(true);
+//     const userMessage = { role: 'user', content: input };
+//     setMessages(prevMessages => [...prevMessages, userMessage]);
+//     setInput('');
+//     setIsLoading(true);
 
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message: input }),
-      });
+//     try {
+//       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat`, {
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify({ message: input }),
+//       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+//       if (!response.ok) {
+//         throw new Error(`HTTP error! status: ${response.status}`);
+//       }
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder('utf-8');
+//       const reader = response.body.getReader();
+//       const decoder = new TextDecoder('utf-8');
 
-      setMessages(prevMessages => [...prevMessages, { role: 'assistant', content: '' }]);
+//       setMessages(prevMessages => [...prevMessages, { role: 'assistant', content: '' }]);
 
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value, { stream: true });
+//       while (true) {
+//         const { value, done } = await reader.read();
+//         if (done) break;
+//         const chunk = decoder.decode(value, { stream: true });
 
-        setMessages(prevMessages => {
-          const newMessages = [...prevMessages];
-          const lastMessage = newMessages[newMessages.length - 1];
-          lastMessage.content += chunk;
-          return newMessages;
-        });
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      setMessages(prevMessages => [...prevMessages, { role: 'assistant', content: 'Error: ' + error.message }]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+//         setMessages(prevMessages => {
+//           const newMessages = [...prevMessages];
+//           const lastMessage = newMessages[newMessages.length - 1];
+//           lastMessage.content += chunk;
+//           return newMessages;
+//         });
+//       }
+//     } catch (error) {
+//       console.error('Error:', error);
+//       setMessages(prevMessages => [...prevMessages, { role: 'assistant', content: 'Error: ' + error.message }]);
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   };
 
-  const renderMessage = (message) => {
-    const codeBlockRegex = /```([\s\S]*?)```|(?:\b(?:SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP)[\s\S]*?;)|(?:^|\n)(?:import|from|def|class|if|for|while|try|except|with)[\s\S]*?(?:\n\n|\Z)/gi;
-    const parts = message.content.split(codeBlockRegex);
+//   const renderMessage = (message) => {
+//     const codeBlockRegex = /```([\s\S]*?)```|(?:\b(?:SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP)[\s\S]*?;)|(?:^|\n)(?:import|from|def|class|if|for|while|try|except|with)[\s\S]*?(?:\n\n|\Z)/gi;
+//     const parts = message.content.split(codeBlockRegex);
 
-    const visualizeSQL = (sql) => {
-      // 임의의 데이터 생성
-      const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
-      const data = labels.map(() => Math.floor(Math.random() * 100));
+//     const visualizeSQL = (sql) => {
+//       // 임의의 데이터 생성
+//       const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
+//       const data = labels.map(() => Math.floor(Math.random() * 100));
 
-      const newChartData = {
-        labels,
-        datasets: [
-          {
-            label: 'SQL Query Result',
-            data: data,
-            backgroundColor: 'rgba(75, 192, 192, 0.6)',
-          },
-        ],
-      };
+//       const newChartData = {
+//         labels,
+//         datasets: [
+//           {
+//             label: 'SQL Query Result',
+//             data: data,
+//             backgroundColor: 'rgba(75, 192, 192, 0.6)',
+//           },
+//         ],
+//       };
 
-      setChartData(newChartData);
-    };
+//       setChartData(newChartData);
+//     };
 
-    return parts.map((part, index) => {
-      if (codeBlockRegex.test(part) || part.trim().startsWith('```')) {
-        const code = part.replace(/```(python|sql)?|```/gi, '').trim();
-        const isSQL = /\b(SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP)\b/i.test(code);
+//     return parts.map((part, index) => {
+//       if (codeBlockRegex.test(part) || part.trim().startsWith('```')) {
+//         const code = part.replace(/```(python|sql)?|```/gi, '').trim();
+//         const isSQL = /\b(SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP)\b/i.test(code);
 
-        return (
-          <div key={index} className={styles.codeBlockContainer}>
-            <pre className={styles.codeBlock}>
-              <code>{code}</code>
-            </pre>
-            <div className={styles.buttonContainer}>
-              <button 
-                className={styles.copyButton}
-                onClick={() => navigator.clipboard.writeText(code)}
-              >
-                Copy code
-              </button>
-              {isSQL && (
-                <button 
-                  className={styles.visualizeButton}
-                  onClick={() => visualizeSQL(code)}
-                >
-                  Visualizing SQL
-                </button>
-              )}
-            </div>
-            {chartData && (
-              <div className={styles.chartContainer}>
-                <Bar data={chartData} />
-              </div>
-            )}
-          </div>
-        );
-      }
-      return <span key={index}>{part}</span>;
-    });
-  };
+//         return (
+//           <div key={index} className={styles.codeBlockContainer}>
+//             <pre className={styles.codeBlock}>
+//               <code>{code}</code>
+//             </pre>
+//             <div className={styles.buttonContainer}>
+//               <button 
+//                 className={styles.copyButton}
+//                 onClick={() => navigator.clipboard.writeText(code)}
+//               >
+//                 Copy code
+//               </button>
+//               {isSQL && (
+//                 <button 
+//                   className={styles.visualizeButton}
+//                   onClick={() => visualizeSQL(code)}
+//                 >
+//                   Visualizing SQL
+//                 </button>
+//               )}
+//             </div>
+//             {chartData && (
+//               <div className={styles.chartContainer}>
+//                 <Bar data={chartData} />
+//               </div>
+//             )}
+//           </div>
+//         );
+//       }
+//       return <span key={index}>{part}</span>;
+//     });
+//   };
 
-  return (
-    <main className={styles.main}>
-      <div className={styles.topper}>
-        <div className={styles.icon}></div>
-        <div className={styles.name}>HanGPT</div>
-      </div>
-      <div className={styles.msgs_cont}>
-        <ul id="list_cont">
-          {messages.map((message, index) => (
-            <li key={index} className={message.role === 'user' ? styles.schat : styles.rchat}>
-              {renderMessage(message)}
-            </li>
-          ))}
-          <div ref={messagesEndRef} />
-        </ul>
-      </div>
-      <div className={styles.bottom}>
-        <form onSubmit={handleSubmit} className={styles.input}>
-          <input
-            type="text"
-            id="txt"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="메시지를 입력하세요..."
-          />
-          <button type="submit" className={`${styles.sendBtn} ${input.trim() ? styles.active : ''}`}>
-            <i className="uil uil-message"></i>
-          </button>
-        </form>
-      </div>
-    </main>
-  );
-}
+//   return (
+//     <main className={styles.main}>
+//       <div className={styles.topper}>
+//         <div className={styles.icon}></div>
+//         <div className={styles.name}>HanGPT</div>
+//       </div>
+//       <div className={styles.msgs_cont}>
+//         <ul id="list_cont">
+//           {messages.map((message, index) => (
+//             <li key={index} className={message.role === 'user' ? styles.schat : styles.rchat}>
+//               {renderMessage(message)}
+//             </li>
+//           ))}
+//           <div ref={messagesEndRef} />
+//         </ul>
+//       </div>
+//       <div className={styles.bottom}>
+//         <form onSubmit={handleSubmit} className={styles.input}>
+//           <input
+//             type="text"
+//             id="txt"
+//             value={input}
+//             onChange={(e) => setInput(e.target.value)}
+//             placeholder="메시지를 입력하세요..."
+//           />
+//           <button type="submit" className={`${styles.sendBtn} ${input.trim() ? styles.active : ''}`}>
+//             <i className="uil uil-message"></i>
+//           </button>
+//         </form>
+//       </div>
+//     </main>
+//   );
+// }
 
 
 //===========================헤당 코드블록 아래 차트가 생기지만 일반 텍스트와 쿼리의 구분이 잘 안됨============================
@@ -860,3 +860,173 @@ export default function Home() {
 
 
 
+
+
+'use client';
+
+export const dynamic = 'force-dynamic';
+
+import React, { useState, useEffect, useRef } from 'react';
+import { Bar } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import styles from './page.module.css';
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+
+export default function Home() {
+  const [input, setInput] = useState('');
+  const [messages, setMessages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [chartData, setChartData] = useState({});
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(scrollToBottom, [messages]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!input.trim() || isLoading) return;
+
+    const userMessage = { role: 'user', content: input };
+    setMessages(prevMessages => [...prevMessages, userMessage]);
+    setInput('');
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: input }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+
+      setMessages(prevMessages => [...prevMessages, { role: 'assistant', content: '' }]);
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+
+        setMessages(prevMessages => {
+          const newMessages = [...prevMessages];
+          const lastMessage = newMessages[newMessages.length - 1];
+          lastMessage.content += chunk;
+          return newMessages;
+        });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setMessages(prevMessages => [...prevMessages, { role: 'assistant', content: 'Error: ' + error.message }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const visualizeSQL = (sql, index) => {
+    // 임의의 데이터 생성
+    const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
+    const data = labels.map(() => Math.floor(Math.random() * 100));
+
+    const newChartData = {
+      labels,
+      datasets: [
+        {
+          label: 'SQL Query Result',
+          data: data,
+          backgroundColor: 'rgba(75, 192, 192, 0.6)',
+        },
+      ],
+    };
+
+    setChartData(prevChartData => ({
+      ...prevChartData,
+      [index]: newChartData
+    }));
+  };
+
+  const renderMessage = (message, messageIndex) => {
+    const codeBlockRegex = /```([\s\S]*?)```|(?:\b(?:SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP)[\s\S]*?;)|(?:^|\n)(?:import|from|def|class|if|for|while|try|except|with)[\s\S]*?(?:\n\n|\Z)/gi;
+    const parts = message.content.split(codeBlockRegex);
+
+    return parts.map((part, index) => {
+      if (index % 2 === 1) {  // 코드 블록인 경우
+        const code = part.replace(/```(python|sql)?|```/gi, '').trim();
+        const isSQL = /\b(SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP)\b/i.test(code);
+
+        return (
+          <div key={index} className={styles.codeBlockContainer}>
+            <pre className={styles.codeBlock}>
+              <code>{code}</code>
+            </pre>
+            <div className={styles.buttonContainer}>
+              <button 
+                className={styles.copyButton}
+                onClick={() => navigator.clipboard.writeText(code)}
+              >
+                Copy code
+              </button>
+              {isSQL && (
+                <button 
+                  className={styles.visualizeButton}
+                  onClick={() => visualizeSQL(code, `${messageIndex}-${index}`)}
+                >
+                  Visualizing SQL
+                </button>
+              )}
+            </div>
+            {chartData[`${messageIndex}-${index}`] && (
+              <div className={styles.chartContainer}>
+                <Bar data={chartData[`${messageIndex}-${index}`]} />
+              </div>
+            )}
+          </div>
+        );
+      }
+      return <span key={index}>{part}</span>;
+    });
+  };
+
+  return (
+    <main className={styles.main}>
+      <div className={styles.topper}>
+        <div className={styles.icon}></div>
+        <div className={styles.name}>HanGPT</div>
+      </div>
+      <div className={styles.msgs_cont}>
+        <ul id="list_cont">
+          {messages.map((message, index) => (
+            <li key={index} className={message.role === 'user' ? styles.schat : styles.rchat}>
+              {renderMessage(message, index)}
+            </li>
+          ))}
+          <div ref={messagesEndRef} />
+        </ul>
+      </div>
+      <div className={styles.bottom}>
+        <form onSubmit={handleSubmit} className={styles.input}>
+          <input
+            type="text"
+            id="txt"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="메시지를 입력하세요..."
+          />
+          <button type="submit" className={`${styles.sendBtn} ${input.trim() ? styles.active : ''}`}>
+            <i className="uil uil-message"></i>
+          </button>
+        </form>
+      </div>
+    </main>
+  );
+}
