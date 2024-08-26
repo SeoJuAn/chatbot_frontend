@@ -509,7 +509,6 @@
 //   );
 // }
 
-
 'use client';
 
 export const dynamic = 'force-dynamic';
@@ -525,6 +524,7 @@ export default function Home() {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [chartData, setChartData] = useState(null);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -581,8 +581,6 @@ export default function Home() {
   };
 
   const renderMessage = (message) => {
-    const [chartData, setChartData] = useState(null);
-
     const codeBlockRegex = /```([\s\S]*?)```|(?:\b(?:SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP)[\s\S]*?;)|(?:^|\n)(?:import|from|def|class|if|for|while|try|except|with)[\s\S]*?(?:\n\n|\Z)/gi;
     const parts = message.content.split(codeBlockRegex);
 
@@ -591,7 +589,7 @@ export default function Home() {
       const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
       const data = labels.map(() => Math.floor(Math.random() * 100));
 
-      const chartData = {
+      const newChartData = {
         labels,
         datasets: [
           {
@@ -602,7 +600,7 @@ export default function Home() {
         ],
       };
 
-      setChartData(chartData);
+      setChartData(newChartData);
     };
 
     return parts.map((part, index) => {
