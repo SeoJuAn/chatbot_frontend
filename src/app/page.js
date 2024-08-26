@@ -450,20 +450,44 @@ export default function Home() {
     }
   };
 
-  const renderMessage = (message) => {
-    const codeBlockRegex = /```([\s\S]*?)```|\b(SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP)[\s\S]*?;/gi;
-    const parts = message.content.split(codeBlockRegex);
+  // const renderMessage = (message) => {
+  //   const codeBlockRegex = /```([\s\S]*?)```|\b(SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP)[\s\S]*?;/gi;
+  //   const parts = message.content.split(codeBlockRegex);
 
+  //   return parts.map((part, index) => {
+  //     if (codeBlockRegex.test(part)) {
+  //       return (
+  //         <div key={index} className={styles.codeBlockContainer}>
+  //           <pre className={styles.codeBlock}>
+  //             <code>{part.replace(/```/g, '').trim()}</code>
+  //           </pre>
+  //           <button 
+  //             className={styles.copyButton}
+  //             onClick={() => navigator.clipboard.writeText(part.replace(/```/g, '').trim())}
+  //           >
+  //             Copy code
+  //           </button>
+  //         </div>
+  //       );
+  //     }
+  //     return <span key={index}>{part}</span>;
+  //   });
+  // };
+  const renderMessage = (message) => {
+    const codeBlockRegex = /```([\s\S]*?)```|(?:\b(?:SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP)[\s\S]*?;)|(?:^|\n)(?:import|from|def|class|if|for|while|try|except|with)[\s\S]*?(?:\n\n|\Z)/gi;
+    const parts = message.content.split(codeBlockRegex);
+  
     return parts.map((part, index) => {
-      if (codeBlockRegex.test(part)) {
+      if (codeBlockRegex.test(part) || part.trim().startsWith('```')) {
+        const code = part.replace(/```(python)?|```/gi, '').trim();
         return (
           <div key={index} className={styles.codeBlockContainer}>
             <pre className={styles.codeBlock}>
-              <code>{part.replace(/```/g, '').trim()}</code>
+              <code>{code}</code>
             </pre>
             <button 
               className={styles.copyButton}
-              onClick={() => navigator.clipboard.writeText(part.replace(/```/g, '').trim())}
+              onClick={() => navigator.clipboard.writeText(code)}
             >
               Copy code
             </button>
