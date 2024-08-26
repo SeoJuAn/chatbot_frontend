@@ -676,6 +676,7 @@
 // }
 
 
+
 'use client';
 
 export const dynamic = 'force-dynamic';
@@ -734,7 +735,7 @@ export default function Home() {
         setMessages(prevMessages => {
           const newMessages = [...prevMessages];
           const lastMessage = newMessages[newMessages.length - 1];
-          lastMessage.content += chunk;
+          lastMessage.content += typeof chunk === 'string' ? chunk : '';
           return newMessages;
         });
       }
@@ -747,11 +748,15 @@ export default function Home() {
   };
 
   const renderMessage = (message) => {
+    if (!message || typeof message.content !== 'string') {
+      return null;
+    }
+
     const codeBlockRegex = /```([\s\S]*?)```|(?:\b(?:SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP)[\s\S]*?;)|(?:^|\n)(?:import|from|def|class|if|for|while|try|except|with)[\s\S]*?(?:\n\n|\Z)/gi;
     const parts = message.content.split(codeBlockRegex);
 
     return parts.map((part, index) => {
-      if (codeBlockRegex.test(part) || part.trim().startsWith('```')) {
+      if (codeBlockRegex.test(part) || (typeof part === 'string' && part.trim().startsWith('```'))) {
         return <CodeBlock key={index} code={part} />;
       }
       return <span key={index}>{part}</span>;
@@ -813,6 +818,10 @@ function CodeBlock({ code }) {
 
     setChartData(newChartData);
   };
+
+  if (typeof code !== 'string') {
+    return null;
+  }
 
   const cleanedCode = code.replace(/```(python|sql)?|```/gi, '').trim();
   const isSQL = /\b(SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP)\b/i.test(cleanedCode);
