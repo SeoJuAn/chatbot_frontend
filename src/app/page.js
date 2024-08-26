@@ -283,7 +283,6 @@
 
 
 
-
 'use client';
 
 export const dynamic = 'force-dynamic';
@@ -327,23 +326,20 @@ export default function Home() {
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder('utf-8');
-      let assistantMessage = { role: 'assistant', content: '' };
-      
-      setMessages(prevMessages => [...prevMessages, assistantMessage]);
-      
+
+      // 스트리밍 메시지를 시작하며 비어 있는 메시지를 먼저 추가
+      setMessages(prevMessages => [...prevMessages, { role: 'assistant', content: '' }]);
+
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
-
         const chunk = decoder.decode(value, { stream: true });
 
-        // 받은 청크를 바로 assistantMessage에 추가
-        assistantMessage.content += chunk;
-        
-        // messages 상태를 업데이트하여 실시간 반영
+        // 새로운 청크를 받을 때마다 메시지를 업데이트
         setMessages(prevMessages => {
           const newMessages = [...prevMessages];
-          newMessages[newMessages.length - 1] = assistantMessage;
+          const lastMessage = newMessages[newMessages.length - 1];
+          lastMessage.content += chunk;
           return newMessages;
         });
       }
@@ -377,7 +373,7 @@ export default function Home() {
             type="text"
             id="txt"
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => setInput(e.target.value)
             placeholder="메시지를 입력하세요..."
           />
           <button type="submit" className={`${styles.sendBtn} ${input.trim() ? styles.active : ''}`}>
