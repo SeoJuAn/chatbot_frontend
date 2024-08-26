@@ -282,7 +282,6 @@
 // }
 
 
-
 'use client';
 
 export const dynamic = 'force-dynamic';
@@ -373,7 +372,7 @@ export default function Home() {
             type="text"
             id="txt"
             value={input}
-            onChange={(e) => setInput(e.target.value)
+            onChange={(e) => setInput(e.target.value)}
             placeholder="메시지를 입력하세요..."
           />
           <button type="submit" className={`${styles.sendBtn} ${input.trim() ? styles.active : ''}`}>
