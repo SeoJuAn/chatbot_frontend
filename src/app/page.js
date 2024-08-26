@@ -956,13 +956,29 @@ export default function Home() {
   };
 
   const renderMessage = (message, messageIndex) => {
-    const codeBlockRegex = /```([\s\S]*?)```|(?:\b(?:SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP)[\s\S]*?;)|(?:^|\n)(?:import|from|def|class|if|for|while|try|except|with)[\s\S]*?(?:\n\n|\Z)/gi;
-    const parts = message.content.split(codeBlockRegex);
+    const codeBlockRegex = /```([\s\S]*?)```/g;
+    const sqlRegex = /\b(SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP)\b[\s\S]*?;/gi;
+    
+    let parts = [message.content];
+    let codeBlocks = message.content.match(codeBlockRegex) || [];
+    let sqlBlocks = message.content.match(sqlRegex) || [];
+    
+    // 코드 블록과 SQL 쿼리를 모두 포함
+    let allBlocks = [...codeBlocks, ...sqlBlocks];
+    
+    allBlocks.forEach((block, i) => {
+      parts = parts.flatMap(part => {
+        if (typeof part === 'string' && part.includes(block)) {
+          return [part.split(block)[0], block, part.split(block)[1]];
+        }
+        return part;
+      });
+    });
   
     return parts.map((part, index) => {
-      if (index % 2 === 1) {  // 코드 블록인 경우
-        const code = part ? part.replace(/```(python|sql)?|```/gi, '').trim() : '';
-        const isSQL = code && /\b(SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP)\b/i.test(code);
+      if (codeBlocks.includes(part) || sqlBlocks.includes(part)) {
+        const code = part.replace(/```([\s\S]*?)```/g, '$1').trim();
+        const isSQL = sqlBlocks.includes(part);
   
         return (
           <div key={index} className={styles.codeBlockContainer}>
@@ -993,7 +1009,7 @@ export default function Home() {
           </div>
         );
       }
-      return <span key={index}>{part || ''}</span>;
+      return <span key={index}>{part}</span>;
     });
   };
 
