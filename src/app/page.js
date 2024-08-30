@@ -1316,122 +1316,122 @@ export default function Home() {
   };
 
   const visualizeSQL = (sql, index) => {
-        // 임의의 데이터 생성
-        const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
-        const data = labels.map(() => Math.floor(Math.random() * 100));
-    
-        const newChartData = {
-          labels,
-          datasets: [
-            {
-              label: 'SQL Query Result',
-              data: data,
-              backgroundColor: 'rgba(75, 192, 192, 0.6)',
-            },
-          ],
-        };
-    
-        setChartData(prevChartData => ({
-          ...prevChartData,
-          [index]: newChartData
-        }));
+      // 임의의 데이터 생성
+      const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
+      const data = labels.map(() => Math.floor(Math.random() * 100));
+  
+      const newChartData = {
+        labels,
+        datasets: [
+          {
+            label: 'SQL Query Result',
+            data: data,
+            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+          },
+        ],
       };
-    
-      const renderMessage = (message, messageIndex) => {
-        const codeBlockRegex = /```([\s\S]*?)```/g;
-        const sqlRegex = /\b(SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP)\b[\s\S]*?;/gi;
-        
-        let parts = [message.content];
-        let codeBlocks = message.content.match(codeBlockRegex) || [];
-        let sqlBlocks = message.content.match(sqlRegex) || [];
-        
-        // 코드 블록과 SQL 쿼리를 모두 포함
-        let allBlocks = [...codeBlocks, ...sqlBlocks];
-        
-        allBlocks.forEach((block, i) => {
-          parts = parts.flatMap(part => {
-            if (typeof part === 'string' && part.includes(block)) {
-              return [part.split(block)[0], block, part.split(block)[1]];
-            }
-            return part;
-          });
+  
+      setChartData(prevChartData => ({
+        ...prevChartData,
+        [index]: newChartData
+      }));
+    };
+  
+    const renderMessage = (message, messageIndex) => {
+      const codeBlockRegex = /```([\s\S]*?)```/g;
+      const sqlRegex = /\b(SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP)\b[\s\S]*?;/gi;
+      
+      let parts = [message.content];
+      let codeBlocks = message.content.match(codeBlockRegex) || [];
+      let sqlBlocks = message.content.match(sqlRegex) || [];
+      
+      // 코드 블록과 SQL 쿼리를 모두 포함
+      let allBlocks = [...codeBlocks, ...sqlBlocks];
+      
+      allBlocks.forEach((block, i) => {
+        parts = parts.flatMap(part => {
+          if (typeof part === 'string' && part.includes(block)) {
+            return [part.split(block)[0], block, part.split(block)[1]];
+          }
+          return part;
         });
-      
-        return parts.map((part, index) => {
-          if (codeBlocks.includes(part) || sqlBlocks.includes(part)) {
-            const code = part.replace(/```([\s\S]*?)```/g, '$1').trim();
-            const isSQL = sqlBlocks.includes(part);
-      
-            return (
-              <div key={index} className={styles.codeBlockContainer}>
-                <pre className={styles.codeBlock}>
-                  <code>{code}</code>
-                </pre>
-                <div className={styles.buttonContainer}>
+      });
+    
+      return parts.map((part, index) => {
+        if (codeBlocks.includes(part) || sqlBlocks.includes(part)) {
+          const code = part.replace(/```([\s\S]*?)```/g, '$1').trim();
+          const isSQL = sqlBlocks.includes(part);
+    
+          return (
+            <div key={index} className={styles.codeBlockContainer}>
+              <pre className={styles.codeBlock}>
+                <code>{code}</code>
+              </pre>
+              <div className={styles.buttonContainer}>
+                <button 
+                  className={styles.copyButton}
+                  onClick={() => navigator.clipboard.writeText(code)}
+                >
+                  Copy code
+                </button>
+                {isSQL && (
                   <button 
-                    className={styles.copyButton}
-                    onClick={() => navigator.clipboard.writeText(code)}
+                    className={styles.visualizeButton}
+                    onClick={() => visualizeSQL(code, `${messageIndex}-${index}`)}
                   >
-                    Copy code
+                    Visualizing SQL
                   </button>
-                  {isSQL && (
-                    <button 
-                      className={styles.visualizeButton}
-                      onClick={() => visualizeSQL(code, `${messageIndex}-${index}`)}
-                    >
-                      Visualizing SQL
-                    </button>
-                  )}
-                </div>
-                {chartData[`${messageIndex}-${index}`] && (
-                  <div className={styles.chartContainer}>
-                    <Bar data={chartData[`${messageIndex}-${index}`]} />
-                  </div>
                 )}
               </div>
-            );
-          }
-          return <span key={index}>{part}</span>;
-        });
-      };
-    
-      return (
-        <main className={styles.main}>
-          <div className={styles.topper}>
-            <div className={styles.icon}></div>
-            <div className={styles.name}>SeoJuAn's AI Assistant</div>
-          </div>
-          <div className={styles.msgs_cont}>
-            <ul id="list_cont">
-              {messages.map((message, index) => (
-                <li key={index} className={message.role === 'user' ? styles.schat : styles.rchat}>
-                  {renderMessage(message, index)}
-                </li>
-              ))}
-              {isLoading && (
-                <li className={styles.rchat}>
-                  <div className={styles.loadingLogo}>
-                    <div className={styles.loadingSpinner}></div>
-                  </div>
-                </li>
+              {chartData[`${messageIndex}-${index}`] && (
+                <div className={styles.chartContainer}>
+                  <Bar data={chartData[`${messageIndex}-${index}`]} />
+                </div>
               )}
-              <div ref={messagesEndRef} />
-            </ul>
-          </div>
-          <div className={styles.bottom}>
-            <form onSubmit={handleSubmit} className={styles.input}>
-              <input
-                type="text"
-                id="txt"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="메시지를 입력하세요..."
-              />
-              <button type="submit" className={`${styles.sendBtn} ${input.trim() ? styles.active : ''}`}>
-                <i className="uil uil-message"></i>
-              </button>
-            </form>
-          </div>
-        </main>
-      );  
+            </div>
+          );
+        }
+        return <span key={index}>{part}</span>;
+      });
+    };
+  
+    return (
+      <main className={styles.main}>
+        <div className={styles.topper}>
+          <div className={styles.icon}></div>
+          <div className={styles.name}>SeoJuAn's AI Assistant</div>
+        </div>
+        <div className={styles.msgs_cont}>
+          <ul id="list_cont">
+            {messages.map((message, index) => (
+              <li key={index} className={message.role === 'user' ? styles.schat : styles.rchat}>
+                {renderMessage(message, index)}
+              </li>
+            ))}
+            {isLoading && (
+              <li className={styles.rchat}>
+                <div className={styles.loadingLogo}>
+                  <div className={styles.loadingSpinner}></div>
+                </div>
+              </li>
+            )}
+            <div ref={messagesEndRef} />
+          </ul>
+        </div>
+        <div className={styles.bottom}>
+          <form onSubmit={handleSubmit} className={styles.input}>
+            <input
+              type="text"
+              id="txt"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="메시지를 입력하세요..."
+            />
+            <button type="submit" className={`${styles.sendBtn} ${input.trim() ? styles.active : ''}`}>
+              <i className="uil uil-message"></i>
+            </button>
+          </form>
+        </div>
+      </main>
+    );  
 }
