@@ -861,7 +861,7 @@
 
 
 
-
+// 24.08.30 ver1
 'use client';
 
 export const dynamic = 'force-dynamic';
@@ -1013,8 +1013,45 @@ export default function Home() {
     });
   };
 
+  // return (
+  //   <main className={styles.main}>
+  //     <div className={styles.topper}>
+  //       <div className={styles.icon}></div>
+  //       <div className={styles.name}>SeoJuAn's AI Assistant</div>
+  //     </div>
+  //     <div className={styles.msgs_cont}>
+  //       <ul id="list_cont">
+  //         {messages.map((message, index) => (
+  //           <li key={index} className={message.role === 'user' ? styles.schat : styles.rchat}>
+  //             {renderMessage(message, index)}
+  //           </li>
+  //         ))}
+  //         <div ref={messagesEndRef} />
+  //       </ul>
+  //     </div>
+  //     <div className={styles.bottom}>
+  //       <form onSubmit={handleSubmit} className={styles.input}>
+  //         <input
+  //           type="text"
+  //           id="txt"
+  //           value={input}
+  //           onChange={(e) => setInput(e.target.value)}
+  //           placeholder="메시지를 입력하세요..."
+  //         />
+  //         <button type="submit" className={`${styles.sendBtn} ${input.trim() ? styles.active : ''}`}>
+  //           <i className="uil uil-message"></i>
+  //         </button>
+  //       </form>
+  //     </div>
+  //   </main>
+  // );
   return (
     <main className={styles.main}>
+      {isLoading && (
+        <div className={styles.loadingLogo}>
+          <div className={styles.loadingSpinner}></div>
+        </div>
+      )}
       <div className={styles.topper}>
         <div className={styles.icon}></div>
         <div className={styles.name}>SeoJuAn's AI Assistant</div>
@@ -1045,4 +1082,9 @@ export default function Home() {
       </div>
     </main>
   );
+  
+
+
 }
+
+
