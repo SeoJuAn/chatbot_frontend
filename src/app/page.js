@@ -1050,7 +1050,200 @@
 
 
 
-// 24.08.30 ver1
+// 24.08.30 ver2 - add loading spinner
+// 'use client';
+
+// export const dynamic = 'force-dynamic';
+
+// import React, { useState, useEffect, useRef } from 'react';
+// import { Bar } from 'react-chartjs-2';
+// import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+// import styles from './page.module.css';
+
+// ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+
+// export default function Home() {
+//   const [input, setInput] = useState('');
+//   const [messages, setMessages] = useState([]);
+//   const [isLoading, setIsLoading] = useState(false);
+//   const [chartData, setChartData] = useState({});
+//   const messagesEndRef = useRef(null);
+
+//   const scrollToBottom = () => {
+//     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+//   };
+
+//   useEffect(scrollToBottom, [messages]);
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+//     if (!input.trim() || isLoading) return;
+
+//     const userMessage = { role: 'user', content: input };
+//     setMessages(prevMessages => [...prevMessages, userMessage]);
+//     setInput('');
+//     setIsLoading(true);
+
+//     try {
+//       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat`, {
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify({ message: input }),
+//       });
+
+//       if (!response.ok) {
+//         throw new Error(`HTTP error! status: ${response.status}`);
+//       }
+
+//       const reader = response.body.getReader();
+//       const decoder = new TextDecoder('utf-8');
+
+//       setMessages(prevMessages => [...prevMessages, { role: 'assistant', content: '' }]);
+
+//       while (true) {
+//         const { value, done } = await reader.read();
+//         if (done) break;
+//         const chunk = decoder.decode(value, { stream: true });
+
+//         setMessages(prevMessages => {
+//           const newMessages = [...prevMessages];
+//           const lastMessage = newMessages[newMessages.length - 1];
+//           lastMessage.content += chunk;
+//           return newMessages;
+//         });
+//       }
+//     } catch (error) {
+//       console.error('Error:', error);
+//       setMessages(prevMessages => [...prevMessages, { role: 'assistant', content: 'Error: ' + error.message }]);
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   };
+
+//   const visualizeSQL = (sql, index) => {
+//     // 임의의 데이터 생성
+//     const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
+//     const data = labels.map(() => Math.floor(Math.random() * 100));
+
+//     const newChartData = {
+//       labels,
+//       datasets: [
+//         {
+//           label: 'SQL Query Result',
+//           data: data,
+//           backgroundColor: 'rgba(75, 192, 192, 0.6)',
+//         },
+//       ],
+//     };
+
+//     setChartData(prevChartData => ({
+//       ...prevChartData,
+//       [index]: newChartData
+//     }));
+//   };
+
+//   const renderMessage = (message, messageIndex) => {
+//     const codeBlockRegex = /```([\s\S]*?)```/g;
+//     const sqlRegex = /\b(SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP)\b[\s\S]*?;/gi;
+    
+//     let parts = [message.content];
+//     let codeBlocks = message.content.match(codeBlockRegex) || [];
+//     let sqlBlocks = message.content.match(sqlRegex) || [];
+    
+//     // 코드 블록과 SQL 쿼리를 모두 포함
+//     let allBlocks = [...codeBlocks, ...sqlBlocks];
+    
+//     allBlocks.forEach((block, i) => {
+//       parts = parts.flatMap(part => {
+//         if (typeof part === 'string' && part.includes(block)) {
+//           return [part.split(block)[0], block, part.split(block)[1]];
+//         }
+//         return part;
+//       });
+//     });
+  
+//     return parts.map((part, index) => {
+//       if (codeBlocks.includes(part) || sqlBlocks.includes(part)) {
+//         const code = part.replace(/```([\s\S]*?)```/g, '$1').trim();
+//         const isSQL = sqlBlocks.includes(part);
+  
+//         return (
+//           <div key={index} className={styles.codeBlockContainer}>
+//             <pre className={styles.codeBlock}>
+//               <code>{code}</code>
+//             </pre>
+//             <div className={styles.buttonContainer}>
+//               <button 
+//                 className={styles.copyButton}
+//                 onClick={() => navigator.clipboard.writeText(code)}
+//               >
+//                 Copy code
+//               </button>
+//               {isSQL && (
+//                 <button 
+//                   className={styles.visualizeButton}
+//                   onClick={() => visualizeSQL(code, `${messageIndex}-${index}`)}
+//                 >
+//                   Visualizing SQL
+//                 </button>
+//               )}
+//             </div>
+//             {chartData[`${messageIndex}-${index}`] && (
+//               <div className={styles.chartContainer}>
+//                 <Bar data={chartData[`${messageIndex}-${index}`]} />
+//               </div>
+//             )}
+//           </div>
+//         );
+//       }
+//       return <span key={index}>{part}</span>;
+//     });
+//   };
+
+//   return (
+//     <main className={styles.main}>
+//       <div className={styles.topper}>
+//         <div className={styles.icon}></div>
+//         <div className={styles.name}>SeoJuAn's AI Assistant</div>
+//       </div>
+//       <div className={styles.msgs_cont}>
+//         <ul id="list_cont">
+//           {messages.map((message, index) => (
+//             <li key={index} className={message.role === 'user' ? styles.schat : styles.rchat}>
+//               {renderMessage(message, index)}
+//             </li>
+//           ))}
+//           {isLoading && (
+//             <li className={styles.rchat}>
+//               <div className={styles.loadingLogo}>
+//                 <div className={styles.loadingSpinner}></div>
+//               </div>
+//             </li>
+//           )}
+//           <div ref={messagesEndRef} />
+//         </ul>
+//       </div>
+//       <div className={styles.bottom}>
+//         <form onSubmit={handleSubmit} className={styles.input}>
+//           <input
+//             type="text"
+//             id="txt"
+//             value={input}
+//             onChange={(e) => setInput(e.target.value)}
+//             placeholder="메시지를 입력하세요..."
+//           />
+//           <button type="submit" className={`${styles.sendBtn} ${input.trim() ? styles.active : ''}`}>
+//             <i className="uil uil-message"></i>
+//           </button>
+//         </form>
+//       </div>
+//     </main>
+//   );  
+// }
+
+
 'use client';
 
 export const dynamic = 'force-dynamic';
@@ -1123,122 +1316,122 @@ export default function Home() {
   };
 
   const visualizeSQL = (sql, index) => {
-    // 임의의 데이터 생성
-    const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
-    const data = labels.map(() => Math.floor(Math.random() * 100));
-
-    const newChartData = {
-      labels,
-      datasets: [
-        {
-          label: 'SQL Query Result',
-          data: data,
-          backgroundColor: 'rgba(75, 192, 192, 0.6)',
-        },
-      ],
-    };
-
-    setChartData(prevChartData => ({
-      ...prevChartData,
-      [index]: newChartData
-    }));
-  };
-
-  const renderMessage = (message, messageIndex) => {
-    const codeBlockRegex = /```([\s\S]*?)```/g;
-    const sqlRegex = /\b(SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP)\b[\s\S]*?;/gi;
+        // 임의의 데이터 생성
+        const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
+        const data = labels.map(() => Math.floor(Math.random() * 100));
     
-    let parts = [message.content];
-    let codeBlocks = message.content.match(codeBlockRegex) || [];
-    let sqlBlocks = message.content.match(sqlRegex) || [];
+        const newChartData = {
+          labels,
+          datasets: [
+            {
+              label: 'SQL Query Result',
+              data: data,
+              backgroundColor: 'rgba(75, 192, 192, 0.6)',
+            },
+          ],
+        };
     
-    // 코드 블록과 SQL 쿼리를 모두 포함
-    let allBlocks = [...codeBlocks, ...sqlBlocks];
+        setChartData(prevChartData => ({
+          ...prevChartData,
+          [index]: newChartData
+        }));
+      };
     
-    allBlocks.forEach((block, i) => {
-      parts = parts.flatMap(part => {
-        if (typeof part === 'string' && part.includes(block)) {
-          return [part.split(block)[0], block, part.split(block)[1]];
-        }
-        return part;
-      });
-    });
-  
-    return parts.map((part, index) => {
-      if (codeBlocks.includes(part) || sqlBlocks.includes(part)) {
-        const code = part.replace(/```([\s\S]*?)```/g, '$1').trim();
-        const isSQL = sqlBlocks.includes(part);
-  
-        return (
-          <div key={index} className={styles.codeBlockContainer}>
-            <pre className={styles.codeBlock}>
-              <code>{code}</code>
-            </pre>
-            <div className={styles.buttonContainer}>
-              <button 
-                className={styles.copyButton}
-                onClick={() => navigator.clipboard.writeText(code)}
-              >
-                Copy code
-              </button>
-              {isSQL && (
-                <button 
-                  className={styles.visualizeButton}
-                  onClick={() => visualizeSQL(code, `${messageIndex}-${index}`)}
-                >
-                  Visualizing SQL
-                </button>
-              )}
-            </div>
-            {chartData[`${messageIndex}-${index}`] && (
-              <div className={styles.chartContainer}>
-                <Bar data={chartData[`${messageIndex}-${index}`]} />
+      const renderMessage = (message, messageIndex) => {
+        const codeBlockRegex = /```([\s\S]*?)```/g;
+        const sqlRegex = /\b(SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP)\b[\s\S]*?;/gi;
+        
+        let parts = [message.content];
+        let codeBlocks = message.content.match(codeBlockRegex) || [];
+        let sqlBlocks = message.content.match(sqlRegex) || [];
+        
+        // 코드 블록과 SQL 쿼리를 모두 포함
+        let allBlocks = [...codeBlocks, ...sqlBlocks];
+        
+        allBlocks.forEach((block, i) => {
+          parts = parts.flatMap(part => {
+            if (typeof part === 'string' && part.includes(block)) {
+              return [part.split(block)[0], block, part.split(block)[1]];
+            }
+            return part;
+          });
+        });
+      
+        return parts.map((part, index) => {
+          if (codeBlocks.includes(part) || sqlBlocks.includes(part)) {
+            const code = part.replace(/```([\s\S]*?)```/g, '$1').trim();
+            const isSQL = sqlBlocks.includes(part);
+      
+            return (
+              <div key={index} className={styles.codeBlockContainer}>
+                <pre className={styles.codeBlock}>
+                  <code>{code}</code>
+                </pre>
+                <div className={styles.buttonContainer}>
+                  <button 
+                    className={styles.copyButton}
+                    onClick={() => navigator.clipboard.writeText(code)}
+                  >
+                    Copy code
+                  </button>
+                  {isSQL && (
+                    <button 
+                      className={styles.visualizeButton}
+                      onClick={() => visualizeSQL(code, `${messageIndex}-${index}`)}
+                    >
+                      Visualizing SQL
+                    </button>
+                  )}
+                </div>
+                {chartData[`${messageIndex}-${index}`] && (
+                  <div className={styles.chartContainer}>
+                    <Bar data={chartData[`${messageIndex}-${index}`]} />
+                  </div>
+                )}
               </div>
-            )}
+            );
+          }
+          return <span key={index}>{part}</span>;
+        });
+      };
+    
+      return (
+        <main className={styles.main}>
+          <div className={styles.topper}>
+            <div className={styles.icon}></div>
+            <div className={styles.name}>SeoJuAn's AI Assistant</div>
           </div>
-        );
-      }
-      return <span key={index}>{part}</span>;
-    });
-  };
-
-  return (
-    <main className={styles.main}>
-      <div className={styles.topper}>
-        <div className={styles.icon}></div>
-        <div className={styles.name}>SeoJuAn's AI Assistant</div>
-      </div>
-      <div className={styles.msgs_cont}>
-        <ul id="list_cont">
-          {messages.map((message, index) => (
-            <li key={index} className={message.role === 'user' ? styles.schat : styles.rchat}>
-              {renderMessage(message, index)}
-            </li>
-          ))}
-          {isLoading && (
-            <li className={styles.rchat}>
-              <div className={styles.loadingLogo}>
-                <div className={styles.loadingSpinner}></div>
-              </div>
-            </li>
-          )}
-          <div ref={messagesEndRef} />
-        </ul>
-      </div>
-      <div className={styles.bottom}>
-        <form onSubmit={handleSubmit} className={styles.input}>
-          <input
-            type="text"
-            id="txt"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="메시지를 입력하세요..."
-          />
-          <button type="submit" className={`${styles.sendBtn} ${input.trim() ? styles.active : ''}`}>
-            <i className="uil uil-message"></i>
-          </button>
-        </form>
-      </div>
-    </main>
-  );  
+          <div className={styles.msgs_cont}>
+            <ul id="list_cont">
+              {messages.map((message, index) => (
+                <li key={index} className={message.role === 'user' ? styles.schat : styles.rchat}>
+                  {renderMessage(message, index)}
+                </li>
+              ))}
+              {isLoading && (
+                <li className={styles.rchat}>
+                  <div className={styles.loadingLogo}>
+                    <div className={styles.loadingSpinner}></div>
+                  </div>
+                </li>
+              )}
+              <div ref={messagesEndRef} />
+            </ul>
+          </div>
+          <div className={styles.bottom}>
+            <form onSubmit={handleSubmit} className={styles.input}>
+              <input
+                type="text"
+                id="txt"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="메시지를 입력하세요..."
+              />
+              <button type="submit" className={`${styles.sendBtn} ${input.trim() ? styles.active : ''}`}>
+                <i className="uil uil-message"></i>
+              </button>
+            </form>
+          </div>
+        </main>
+      );  
 }
