@@ -268,3 +268,26 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+
+.chartControls {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.filterGroup label {
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.filterGroup select {
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
