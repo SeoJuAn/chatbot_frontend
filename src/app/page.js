@@ -541,9 +541,20 @@ export default function Home() {
           data: processedData.map(item => parseFloat(item[initialFact])),
           // backgroundColor: `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.6)`,
           backgroundColor: (() => {
-            const r = Math.floor(Math.random() * 255);
-            const g = Math.floor(Math.random() * 100); // 초록색 성분을 낮게 유지
-            const b = Math.floor(Math.random() * 255);
+            const colorSchemes = [
+              { r: 0, g: 0, b: 200 },     // 진한 파란색
+              { r: 200, g: 0, b: 0 },     // 진한 빨간색
+              { r: 128, g: 0, b: 128 },   // 보라색
+              { r: 139, g: 69, b: 19 }    // 갈색
+            ];
+            
+            const selectedColor = colorSchemes[Math.floor(Math.random() * colorSchemes.length)];
+            
+            // 각 색상 값에 약간의 변화를 줍니다 (-20 ~ +20)
+            const r = Math.max(0, Math.min(255, selectedColor.r + Math.floor(Math.random() * 41) - 20));
+            const g = Math.max(0, Math.min(255, selectedColor.g + Math.floor(Math.random() * 41) - 20));
+            const b = Math.max(0, Math.min(255, selectedColor.b + Math.floor(Math.random() * 41) - 20));
+            
             return `rgba(${r}, ${g}, ${b}, 0.6)`;
           })(),
         }],
