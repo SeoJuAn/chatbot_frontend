@@ -1325,37 +1325,44 @@ export default function Home() {
         },
         body: JSON.stringify({ sql: sql }),
       });
-
+  
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
+  
       const data = await response.json();
-
-      // API 응답 데이터 구조에 따라 이 부분을 조정해야 할 수 있습니다.
-      const labels = data.map(item => item.label);
-      const values = data.map(item => item.value);
-
+  
+      if (data.length === 0) {
+        console.log("No data returned from the query");
+        return;
+      }
+  
+      // 동적으로 컬럼 추출
+      const columns = Object.keys(data[0]);
+      
+      // 첫 번째 컬럼을 라벨로 사용
+      const labels = data.map(item => item[columns[0]]);
+  
+      // 나머지 컬럼들을 데이터셋으로 사용
+      const datasets = columns.slice(1).map((column, i) => ({
+        label: column,
+        data: data.map(item => item[column]),
+        backgroundColor: `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.6)`,
+      }));
+  
       const newChartData = {
         labels,
-        datasets: [
-          {
-            label: 'SQL Query Result',
-            data: values,
-            backgroundColor: 'rgba(75, 192, 192, 0.6)',
-          },
-        ],
+        datasets,
       };
-
-      
+  
       setChartData(prevChartData => ({
         ...prevChartData,
         [index]: newChartData
       }));
-
+  
       console.log(newChartData);
       console.log(setChartData);
-
+  
     } catch (error) {
       console.error('Error visualizing SQL:', error);
       // 에러 처리를 위한 상태 업데이트나 사용자에게 알림을 추가할 수 있습니다.
