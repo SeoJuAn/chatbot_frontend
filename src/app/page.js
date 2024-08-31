@@ -1347,10 +1347,15 @@ export default function Home() {
         ],
       };
 
+      
       setChartData(prevChartData => ({
         ...prevChartData,
         [index]: newChartData
       }));
+
+      console.log(newChartData);
+      console.log(setChartData);
+
     } catch (error) {
       console.error('Error visualizing SQL:', error);
       // 에러 처리를 위한 상태 업데이트나 사용자에게 알림을 추가할 수 있습니다.
