@@ -550,12 +550,12 @@ export default function Home() {
             
             const selectedColor = colorSchemes[Math.floor(Math.random() * colorSchemes.length)];
             
-            // 각 색상 값에 약간의 변화를 줍니다 (-20 ~ +20)
-            const r = Math.max(0, Math.min(255, selectedColor.r + Math.floor(Math.random() * 41) - 20));
-            const g = Math.max(0, Math.min(255, selectedColor.g + Math.floor(Math.random() * 41) - 20));
-            const b = Math.max(0, Math.min(255, selectedColor.b + Math.floor(Math.random() * 41) - 20));
+            // 각 색상 값에 약간의 변화를 줍니다 (-10 ~ +10)
+            const r = Math.max(0, Math.min(255, selectedColor.r + Math.floor(Math.random() * 21) - 10));
+            const g = Math.max(0, Math.min(255, selectedColor.g + Math.floor(Math.random() * 21) - 10));
+            const b = Math.max(0, Math.min(255, selectedColor.b + Math.floor(Math.random() * 21) - 10));
             
-            return `rgba(${r}, ${g}, ${b}, 0.6)`;
+            return `rgba(${r}, ${g}, ${b}, 0.5)`;
           })(),
         }],
       };
