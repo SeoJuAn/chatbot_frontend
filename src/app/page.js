@@ -860,25 +860,16 @@ export default function Home() {
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   useEffect(() => {
     scrollToBottom();
-    const observer = new MutationObserver(scrollToBottom);
-    const listCont = document.getElementById('list_cont');
+  }, [messages]);
 
-    if (listCont) {
-      observer.observe(listCont, { childList: true });
-    }
-
-    return () => {
-      if (listCont) {
-        observer.disconnect();
-      }
-    };
-  }, [messages, isLoading]);
-
+  // 폼 제출 처리
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
@@ -917,12 +908,14 @@ export default function Home() {
           lastMessage.content += chunk;
           return newMessages;
         });
+        scrollToBottom(); // Chunk마다 스크롤
       }
     } catch (error) {
       console.error('Error:', error);
       setMessages(prevMessages => [...prevMessages, { role: 'assistant', content: 'Error: ' + error.message }]);
     } finally {
       setIsLoading(false);
+      scrollToBottom(); // 메시지 로드 완료 후 스크롤
     }
   };
 
@@ -1227,6 +1220,7 @@ export default function Home() {
         <ul id="list_cont">
           {messages.map((message, index) => (
             <li key={index} className={message.role === 'user' ? styles.schat : styles.rchat}>
+              {/* 메시지 렌더링 함수 */}
               {renderMessage(message, index)}
             </li>
           ))}
