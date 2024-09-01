@@ -1331,7 +1331,7 @@ export default function Home() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: [input] }),
+        body: JSON.stringify({ message: input }),
       });
 
       if (!response.ok) {
