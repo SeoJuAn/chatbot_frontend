@@ -841,7 +841,6 @@
 //   );
 // }
 
-
 'use client';
 
 export const dynamic = 'force-dynamic';
@@ -851,40 +850,45 @@ import { Bar, Line, Scatter } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import styles from './page.module.css';
 
-// ChartJS 컴포넌트 등록
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend);
 
 export default function Home() {
-  // 상태 관리
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [chartStates, setChartStates] = useState({});
   const messagesEndRef = useRef(null);
 
-  // 메시지 목록의 맨 아래로 스크롤
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // 메시지가 추가될 때마다 스크롤
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+    const observer = new MutationObserver(scrollToBottom);
+    const listCont = document.getElementById('list_cont');
 
-  // 폼 제출 처리
+    if (listCont) {
+      observer.observe(listCont, { childList: true });
+    }
+
+    return () => {
+      if (listCont) {
+        observer.disconnect();
+      }
+    };
+  }, [messages, isLoading]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
-    // 사용자 메시지 추가
     const userMessage = { role: 'user', content: input };
     setMessages(prevMessages => [...prevMessages, userMessage]);
     setInput('');
     setIsLoading(true);
 
     try {
-      // Chatting API 요청
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat`, {
         method: 'POST',
         headers: {
@@ -897,7 +901,6 @@ export default function Home() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      // 스트리밍 응답 처리
       const reader = response.body.getReader();
       const decoder = new TextDecoder('utf-8');
 
@@ -923,7 +926,6 @@ export default function Home() {
     }
   };
 
-  // SQL 시각화 함수
   const visualizeSQL = async (sql, index) => {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/sql`, {
@@ -952,7 +954,6 @@ export default function Home() {
       const initialDimension = dimensionColumns[0] || '';
       const initialFact = factColumns[0] || '';
 
-      // Sum 집계를 적용한 초기 데이터 생성
       const summedData = data.reduce((acc, item) => {
         const key = item[initialDimension];
         if (!acc[key]) {
@@ -970,18 +971,16 @@ export default function Home() {
         datasets: [{
           label: initialFact,
           data: processedData.map(item => parseFloat(item[initialFact])),
-          // backgroundColor: `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.6)`,
           backgroundColor: (() => {
             const colorSchemes = [
-              { r: 0, g: 0, b: 200 },     // 진한 파란색
-              { r: 200, g: 0, b: 0 },     // 진한 빨간색
-              { r: 128, g: 0, b: 128 },   // 보라색
-              { r: 139, g: 69, b: 19 }    // 갈색
+              { r: 0, g: 0, b: 200 },     
+              { r: 200, g: 0, b: 0 },     
+              { r: 128, g: 0, b: 128 },   
+              { r: 139, g: 69, b: 19 }    
             ];
             
             const selectedColor = colorSchemes[Math.floor(Math.random() * colorSchemes.length)];
             
-            // 각 색상 값에 약간의 변화를 줍니다 (-10 ~ +10)
             const r = Math.max(0, Math.min(255, selectedColor.r + Math.floor(Math.random() * 21) - 10));
             const g = Math.max(0, Math.min(255, selectedColor.g + Math.floor(Math.random() * 21) - 10));
             const b = Math.max(0, Math.min(255, selectedColor.b + Math.floor(Math.random() * 21) - 10));
@@ -1012,7 +1011,6 @@ export default function Home() {
     }
   };
 
-  // 차트 업데이트 함수
   const updateChart = (index, updates) => {
     setChartStates(prevStates => {
       const chartState = prevStates[index];
@@ -1076,7 +1074,6 @@ export default function Home() {
     });
   };
 
-  // 차트 렌더링 함수
   const renderChart = (index) => {
     const chartState = chartStates[index];
     if (!chartState) return null;
@@ -1167,7 +1164,6 @@ export default function Home() {
     );
   };
 
-  // 메시지 렌더링 함수
   const renderMessage = (message, messageIndex) => {
     const codeBlockRegex = /```([\s\S]*?)```/g;
     const sqlRegex = /\b(SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP)\b[\s\S]*?;/gi;
@@ -1221,7 +1217,6 @@ export default function Home() {
     });
   };
 
-  // UI 렌더링
   return (
     <main className={styles.main}>
       <div className={styles.topper}>
