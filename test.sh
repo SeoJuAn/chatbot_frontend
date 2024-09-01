@@ -3,5 +3,5 @@ curl -X 'POST' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -d '{
-  "message": "hi"
+  "message": ["hi","hi","what is your name?"]
 }'
