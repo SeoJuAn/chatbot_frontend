@@ -1355,7 +1355,7 @@ export default function Home() {
           const newMessages = [...prevMessages];
           const lastMessage = newMessages[newMessages.length - 1];
           lastMessage.content += chunk;
-          console.log('newMessages:',newMessages)
+          console.log('chunk:',chunk)
           return newMessages;
         });
       }
