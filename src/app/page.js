@@ -858,18 +858,25 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [chartStates, setChartStates] = useState({});
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
 
   const scrollToBottom = () => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    if (messagesContainerRef.current) {
+      const scrollHeight = messagesContainerRef.current.scrollHeight;
+      const height = messagesContainerRef.current.clientHeight;
+      const maxScrollTop = scrollHeight - height;
+      messagesContainerRef.current.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0;
     }
   };
 
   useEffect(() => {
-    scrollToBottom();
+    const timer = setTimeout(() => {
+      scrollToBottom();
+    }, 100);  // 100ms 후에 스크롤 조정
+
+    return () => clearTimeout(timer);
   }, [messages]);
 
-  // 폼 제출 처리
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
@@ -908,14 +915,12 @@ export default function Home() {
           lastMessage.content += chunk;
           return newMessages;
         });
-        scrollToBottom(); // Chunk마다 스크롤
       }
     } catch (error) {
       console.error('Error:', error);
       setMessages(prevMessages => [...prevMessages, { role: 'assistant', content: 'Error: ' + error.message }]);
     } finally {
       setIsLoading(false);
-      scrollToBottom(); // 메시지 로드 완료 후 스크롤
     }
   };
 
@@ -966,10 +971,10 @@ export default function Home() {
           data: processedData.map(item => parseFloat(item[initialFact])),
           backgroundColor: (() => {
             const colorSchemes = [
-              { r: 0, g: 0, b: 200 },     
-              { r: 200, g: 0, b: 0 },     
-              { r: 128, g: 0, b: 128 },   
-              { r: 139, g: 69, b: 19 }    
+              { r: 0, g: 0, b: 200 },
+              { r: 200, g: 0, b: 0 },
+              { r: 128, g: 0, b: 128 },
+              { r: 139, g: 69, b: 19 }
             ];
             
             const selectedColor = colorSchemes[Math.floor(Math.random() * colorSchemes.length)];
@@ -1028,213 +1033,212 @@ export default function Home() {
             case 'Sum':
               aggregatedValue = item.values.reduce((sum, value) => sum + value, 0);
               break;
-            case 'Avg':
-              aggregatedValue = item.values.reduce((sum, value) => sum + value, 0) / item.values.length;
-              break;
-            case 'Max':
-              aggregatedValue = Math.max(...item.values);
-              break;
-            case 'Min':
-              aggregatedValue = Math.min(...item.values);
-              break;
-            case 'Count':
-              aggregatedValue = item.values.length;
-              break;
-          }
-          return {
-            [updatedState.selectedDimension]: item[updatedState.selectedDimension],
-            [updatedState.selectedFact]: aggregatedValue
-          };
-        });
-      }
-
-      const newChartData = {
-        labels: processedData.map(item => item[updatedState.selectedDimension]),
-        datasets: [{
-          label: updatedState.selectedFact,
-          data: processedData.map(item => parseFloat(item[updatedState.selectedFact])),
-          backgroundColor: `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.6)`,
-        }],
-      };
-
-      return {
-        ...prevStates,
-        [index]: {
-          ...updatedState,
-          data: newChartData
+              case 'Avg':
+                aggregatedValue = item.values.reduce((sum, value) => sum + value, 0) / item.values.length;
+                break;
+              case 'Max':
+                aggregatedValue = Math.max(...item.values);
+                break;
+              case 'Min':
+                aggregatedValue = Math.min(...item.values);
+                break;
+              case 'Count':
+                aggregatedValue = item.values.length;
+                break;
+            }
+            return {
+              [updatedState.selectedDimension]: item[updatedState.selectedDimension],
+              [updatedState.selectedFact]: aggregatedValue
+            };
+          });
         }
-      };
-    });
-  };
-
-  const renderChart = (index) => {
-    const chartState = chartStates[index];
-    if (!chartState) return null;
-
-    const ChartComponent = chartState.chartType === 'bar' ? Bar : (chartState.chartType === 'line' ? Line : Scatter);
-    
-    const options = {
-      plugins: {
-        tooltip: {
-          callbacks: {
-            label: function(context) {
-              let label = context.dataset.label || '';
-              if (label) {
-                label += ': ';
+  
+        const newChartData = {
+          labels: processedData.map(item => item[updatedState.selectedDimension]),
+          datasets: [{
+            label: updatedState.selectedFact,
+            data: processedData.map(item => parseFloat(item[updatedState.selectedFact])),
+            backgroundColor: `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.6)`,
+          }],
+        };
+  
+        return {
+          ...prevStates,
+          [index]: {
+            ...updatedState,
+            data: newChartData
+          }
+        };
+      });
+    };
+  
+    const renderChart = (index) => {
+      const chartState = chartStates[index];
+      if (!chartState) return null;
+  
+      const ChartComponent = chartState.chartType === 'bar' ? Bar : (chartState.chartType === 'line' ? Line : Scatter);
+      
+      const options = {
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                let label = context.dataset.label || '';
+                if (label) {
+                  label += ': ';
+                }
+                if (context.parsed.y !== null) {
+                  label += new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(context.parsed.y);
+                }
+                return label;
               }
-              if (context.parsed.y !== null) {
-                label += new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(context.parsed.y);
-              }
-              return label;
             }
           }
+        },
+        scales: {
+          y: {
+            beginAtZero: true
+          }
         }
-      },
-      scales: {
-        y: {
-          beginAtZero: true
-        }
-      }
-    };
-
-    return (
-      <div className={styles.chartContainer}>
-        <div className={styles.chartControls}>
-          <div className={styles.filterGroup}>
-            <label htmlFor={`chartType-${index}`}>Chart Type:</label>
-            <select 
-              id={`chartType-${index}`}
-              value={chartState.chartType} 
-              onChange={(e) => updateChart(index, { chartType: e.target.value })}
-            >
-              <option value="bar">Bar</option>
-              <option value="line">Line</option>
-              <option value="scatter">Scatter</option>
-            </select>
-          </div>
-          <div className={styles.filterGroup}>
-            <label htmlFor={`dimension-${index}`}>Dimension:</label>
-            <select 
-              id={`dimension-${index}`}
-              value={chartState.selectedDimension} 
-              onChange={(e) => updateChart(index, { selectedDimension: e.target.value })}
-            >
-              {chartState.dimensions.map(dim => (
-                <option key={dim} value={dim}>{dim}</option>
-              ))}
-            </select>
-          </div>
-          <div className={styles.filterGroup}>
-            <label htmlFor={`fact-${index}`}>Fact:</label>
-            <select 
-              id={`fact-${index}`}
-              value={chartState.selectedFact} 
-              onChange={(e) => updateChart(index, { selectedFact: e.target.value })}
-            >
-              {chartState.facts.map(fact => (
-                <option key={fact} value={fact}>{fact}</option>
-              ))}
-            </select>
-          </div>
-          <div className={styles.filterGroup}>
-            <label htmlFor={`aggregation-${index}`}>Aggregation:</label>
-            <select 
-              id={`aggregation-${index}`}
-              value={chartState.aggregation} 
-              onChange={(e) => updateChart(index, { aggregation: e.target.value })}
-            >
-              <option value="No Aggregation">No Aggregation</option>
-              <option value="Sum">Sum</option>
-              <option value="Avg">Avg</option>
-              <option value="Max">Max</option>
-              <option value="Min">Min</option>
-              <option value="Count">Count</option>
-            </select>
-          </div>
-        </div>
-        <ChartComponent data={chartState.data} options={options} />
-      </div>
-    );
-  };
-
-  const renderMessage = (message, messageIndex) => {
-    const codeBlockRegex = /```([\s\S]*?)```/g;
-    const sqlRegex = /\b(SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP)\b[\s\S]*?;/gi;
-    
-    let parts = [message.content];
-    let codeBlocks = message.content.match(codeBlockRegex) || [];
-    let sqlBlocks = message.content.match(sqlRegex) || [];
-    
-    let allBlocks = [...codeBlocks, ...sqlBlocks];
-    
-    allBlocks.forEach((block, i) => {
-      parts = parts.flatMap(part => {
-        if (typeof part === 'string' && part.includes(block)) {
-          return [part.split(block)[0], block, part.split(block)[1]];
-        }
-        return part;
-      });
-    });
+      };
   
-    return parts.map((part, index) => {
-      if (codeBlocks.includes(part) || sqlBlocks.includes(part)) {
-        const code = part.replace(/```([\s\S]*?)```/g, '$1').trim();
-        const isSQL = sqlBlocks.includes(part);
-  
-        return (
-          <div key={index} className={styles.codeBlockContainer}>
-            <pre className={styles.codeBlock}>
-              <code>{code}</code>
-            </pre>
-            <div className={styles.buttonContainer}>
-              <button 
-                className={styles.copyButton}
-                onClick={() => navigator.clipboard.writeText(code)}
+      return (
+        <div className={styles.chartContainer}>
+          <div className={styles.chartControls}>
+            <div className={styles.filterGroup}>
+              <label htmlFor={`chartType-${index}`}>Chart Type:</label>
+              <select 
+                id={`chartType-${index}`}
+                value={chartState.chartType} 
+                onChange={(e) => updateChart(index, { chartType: e.target.value })}
               >
-                Copy code
-              </button>
-              {isSQL && (
-                <button 
-                  className={styles.visualizeButton}
-                  onClick={() => visualizeSQL(code, `${messageIndex}-${index}`)}
-                >
-                  Visualizing SQL
-                </button>
-              )}
+                <option value="bar">Bar</option>
+                <option value="line">Line</option>
+                <option value="scatter">Scatter</option>
+              </select>
             </div>
-            {renderChart(`${messageIndex}-${index}`)}
+            <div className={styles.filterGroup}>
+              <label htmlFor={`dimension-${index}`}>Dimension:</label>
+              <select 
+                id={`dimension-${index}`}
+                value={chartState.selectedDimension} 
+                onChange={(e) => updateChart(index, { selectedDimension: e.target.value })}
+              >
+                {chartState.dimensions.map(dim => (
+                  <option key={dim} value={dim}>{dim}</option>
+                ))}
+              </select>
+            </div>
+            <div className={styles.filterGroup}>
+              <label htmlFor={`fact-${index}`}>Fact:</label>
+              <select 
+                id={`fact-${index}`}
+                value={chartState.selectedFact} 
+                onChange={(e) => updateChart(index, { selectedFact: e.target.value })}
+              >
+                {chartState.facts.map(fact => (
+                  <option key={fact} value={fact}>{fact}</option>
+                ))}
+              </select>
+            </div>
+            <div className={styles.filterGroup}>
+              <label htmlFor={`aggregation-${index}`}>Aggregation:</label>
+              <select 
+                id={`aggregation-${index}`}
+                value={chartState.aggregation} 
+                onChange={(e) => updateChart(index, { aggregation: e.target.value })}
+              >
+                <option value="No Aggregation">No Aggregation</option>
+                <option value="Sum">Sum</option>
+                <option value="Avg">Avg</option>
+                <option value="Max">Max</option>
+                <option value="Min">Min</option>
+                <option value="Count">Count</option>
+              </select>
+            </div>
           </div>
-        );
-      }
-      return <span key={index}>{part}</span>;
-    });
-  };
-
-  return (
-    <main className={styles.main}>
-      <div className={styles.topper}>
-        <div className={styles.icon}></div>
-        <div className={styles.name}>SeoJuAn's Data Analysis AI Chatbot</div>
-      </div>
-      <div className={styles.msgs_cont}>
-        <ul id="list_cont">
-          {messages.map((message, index) => (
-            <li key={index} className={message.role === 'user' ? styles.schat : styles.rchat}>
-              {/* 메시지 렌더링 함수 */}
-              {renderMessage(message, index)}
-            </li>
-          ))}
-          {isLoading && (
-            <li className={styles.rchat}>
-              <div className={styles.loadingLogo}>
-                <div className={styles.loadingSpinner}></div>
+          <ChartComponent data={chartState.data} options={options} />
+        </div>
+      );
+    };
+  
+    const renderMessage = (message, messageIndex) => {
+      const codeBlockRegex = /```([\s\S]*?)```/g;
+      const sqlRegex = /\b(SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP)\b[\s\S]*?;/gi;
+      
+      let parts = [message.content];
+      let codeBlocks = message.content.match(codeBlockRegex) || [];
+      let sqlBlocks = message.content.match(sqlRegex) || [];
+      
+      let allBlocks = [...codeBlocks, ...sqlBlocks];
+      
+      allBlocks.forEach((block, i) => {
+        parts = parts.flatMap(part => {
+          if (typeof part === 'string' && part.includes(block)) {
+            return [part.split(block)[0], block, part.split(block)[1]];
+          }
+          return part;
+        });
+      });
+    
+      return parts.map((part, index) => {
+        if (codeBlocks.includes(part) || sqlBlocks.includes(part)) {
+          const code = part.replace(/```([\s\S]*?)```/g, '$1').trim();
+          const isSQL = sqlBlocks.includes(part);
+    
+          return (
+            <div key={index} className={styles.codeBlockContainer}>
+              <pre className={styles.codeBlock}>
+                <code>{code}</code>
+              </pre>
+              <div className={styles.buttonContainer}>
+                <button 
+                  className={styles.copyButton}
+                  onClick={() => navigator.clipboard.writeText(code)}
+                >
+                  Copy code
+                </button>
+                {isSQL && (
+                  <button 
+                    className={styles.visualizeButton}
+                    onClick={() => visualizeSQL(code, `${messageIndex}-${index}`)}
+                  >
+                    Visualizing SQL
+                  </button>
+                )}
               </div>
-            </li>
-          )}
-          <div ref={messagesEndRef} />
-        </ul>
-      </div>
-      <div className={styles.bottom}>
+              {renderChart(`${messageIndex}-${index}`)}
+            </div>
+          );
+        }
+        return <span key={index}>{part}</span>;
+      });
+    };
+  
+    return (
+      <main className={styles.main}>
+        <div className={styles.topper}>
+          <div className={styles.icon}></div>
+          <div className={styles.name}>SeoJuAn's Data Analysis AI Chatbot</div>
+        </div>
+        <div className={styles.msgs_cont} ref={messagesContainerRef}>
+          <ul id="list_cont">
+            {messages.map((message, index) => (
+              <li key={index} className={message.role === 'user' ? styles.schat : styles.rchat}>
+                {renderMessage(message, index)}
+              </li>
+            ))}
+            {isLoading && (
+              <li className={styles.rchat}>
+                <div className={styles.loadingLogo}>
+                  <div className={styles.loadingSpinner}></div>
+                </div>
+              </li>
+            )}
+            <div ref={messagesEndRef} />
+          </ul>
+        </div>
+        <div className={styles.bottom}>
         <form onSubmit={handleSubmit} className={styles.input}>
           <input
             type="text"
