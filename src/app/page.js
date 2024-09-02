@@ -1272,7 +1272,9 @@
 
 
 
-// 24.09.01 ver2 - 테이블정보 XML전달, 차트 옵션, 실제 데이터 반영, Scroll Bottom
+
+
+// 24.09.02 ver1 - Stream 중복 제거
 'use client';
 
 export const dynamic = 'force-dynamic';
@@ -1345,17 +1347,19 @@ export default function Home() {
       setMessages(prevMessages => [...prevMessages, { role: 'assistant', content: '' }]);
 
       // 스트리밍 응답 처리
+      let fullContent = '';
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
+        fullContent += chunk;
 
         // 응답 메시지 업데이트
         setMessages(prevMessages => {
           const newMessages = [...prevMessages];
           const lastMessage = newMessages[newMessages.length - 1];
-          lastMessage.content += chunk;
-          console.log('chunk:',chunk)
+          lastMessage.content = fullContent;
+          console.log('chunk:', chunk);
           return newMessages;
         });
       }
@@ -1617,8 +1621,11 @@ export default function Home() {
       
       allBlocks.forEach((block, i) => {
         parts = parts.flatMap(part => {
-          if (typeof part === 'string' && part.includes(block)) {
-            return [part.split(block)[0], block, part.split(block)[1]];
+          if (typeof part === 'string') {
+            const splitParts = part.split(block);
+            return splitParts.flatMap((subPart, index) => 
+              index < splitParts.length - 1 ? [subPart, block] : [subPart]
+            );
           }
           return part;
         });
@@ -1682,19 +1689,24 @@ export default function Home() {
           </ul>
         </div>
         <div className={styles.bottom}>
-        <form onSubmit={handleSubmit} className={styles.input}>
-          <input
-            type="text"
-            id="txt"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="메시지를 입력하세요..."
-          />
-          <button type="submit" className={`${styles.sendBtn} ${input.trim() ? styles.active : ''}`}>
-            <i className="uil uil-message"></i>
-          </button>
-        </form>
-      </div>
-    </main>
-  );
+          <form onSubmit={handleSubmit} className={styles.input}>
+            <input
+              type="text"
+              id="txt"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="메시지를 입력하세요..."
+              disabled={isLoading}
+            />
+            <button 
+              type="submit" 
+              className={`${styles.sendBtn} ${input.trim() && !isLoading ? styles.active : ''}`}
+              disabled={isLoading}
+            >
+              <i className="uil uil-message"></i>
+            </button>
+          </form>
+        </div>
+      </main>
+    );
 }
